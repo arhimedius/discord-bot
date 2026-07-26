@@ -2,6 +2,8 @@ import discord
 import requests
 import json
 import os
+from flask import Flask
+import threading
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 FOLDER_ID = "b1gpjlgfcf3vrqaahjop"
@@ -57,5 +59,18 @@ async def on_message(message):
         async with message.channel.typing():
             answer = ask_yandex(prompt)
             await message.channel.send(answer)
+
+# ===== ВЕБ-СЕРВЕР ДЛЯ RENDER =====
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return "Bot is running!"
+
+def run_web():
+    app.run(host='0.0.0.0', port=10000)
+
+threading.Thread(target=run_web).start()
+# ==================================
 
 client.run(DISCORD_TOKEN)
