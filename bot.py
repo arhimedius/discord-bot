@@ -2,7 +2,7 @@ import discord
 import requests
 import json
 
-DISCORD_TOKEN = "MTUyOTQ3Njg0Mzc1NTkyOTc2MA.G4P9Uu.F4vbQXohqmYzXYp5Ksk5wU3hg0zruTmAJ5-xOs"
+DISCORD_TOKEN = "MTUyOTQ3Njg0Mzc1NTkyOTc2MA.GT3380.H0N-Lfke6u-GzbxhJSFC7h5QIlSxJZ-136LQdQ"
 FOLDER_ID = "b1gpjlgfcf3vrqaahjop"
 API_KEY = "AQVN3v1Bv0-3o2qyoZH0ciVtGXFf32OsMTQb8rPg"
 
