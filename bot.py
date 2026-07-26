@@ -1,13 +1,14 @@
 import discord
 import requests
 import json
+import os
 
-DISCORD_TOKEN = "MTUyOTQ3Njg0Mzc1NTkyOTc2MA.GT3380.H0N-Lfke6u-GzbxhJSFC7h5QIlSxJZ-136LQdQ"
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 FOLDER_ID = "b1gpjlgfcf3vrqaahjop"
 API_KEY = "AQVN3v1Bv0-3o2qyoZH0ciVtGXFf32OsMTQb8rPg"
 
-SYSTEM_PROMPT = "Ты — злой тролль. Ты можешь материться если взбесишься, или же даже оскорблять или шутить над участниками сервера, но только если они зажелают, или напишут в начале своего сообщения SAS."
- 
+SYSTEM_PROMPT = "Ты — злой тролль. Ты можешь материться если взбесишься, или же даже оскорблять или шутить"
+
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
