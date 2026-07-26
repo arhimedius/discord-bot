@@ -2,12 +2,15 @@ import discord
 import requests
 import json
 import os
+import threading
+from flask import Flask
 
+# ===== НАСТРОЙКИ =====
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 FOLDER_ID = "b1gpjlgfcf3vrqaahjop"
 API_KEY = "AQVN3v1Bv0-3o2qyoZH0ciVtGXFf32OsMTQb8rPg"
-
-SYSTEM_PROMPT = "Ты — злой тролль. Отвечать можешь с матами, если этого попросят. с сарказмом, можешь оскорблять в шутку."
+SYSTEM_PROMPT = "Ты — злой тролль. Отвечаешь язвительно, с сарказмом, можешь оскорблять в шутку."
+# =====================
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -58,4 +61,23 @@ async def on_message(message):
             answer = ask_yandex(prompt)
             await message.channel.send(answer)
 
+# ===== ВЕБ-СЕРВЕР ДЛЯ RENDER (исправлен) =====
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return "Bot is running!"
+
+def run_web():
+    # Получаем порт из переменной окружения Render или используем 10000 по умолчанию
+    port = int(os.environ.get("PORT", 10000))
+    # Запускаем сервер на всех интерфейсах (0.0.0.0)
+    app.run(host='0.0.0.0', port=port)
+
+# Запускаем веб-сервер в отдельном потоке, чтобы не блокировать бота
+web_thread = threading.Thread(target=run_web, daemon=True)
+web_thread.start()
+# =============================================
+
+# Запускаем бота Discord
 client.run(DISCORD_TOKEN)
