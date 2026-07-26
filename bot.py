@@ -2,14 +2,12 @@ import discord
 import requests
 import json
 import os
-from flask import Flask
-import threading
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 FOLDER_ID = "b1gpjlgfcf3vrqaahjop"
 API_KEY = "AQVN3v1Bv0-3o2qyoZH0ciVtGXFf32OsMTQb8rPg"
 
-SYSTEM_PROMPT = "Ты — злой тролль. Ты можешь материться если взбесишься, или же даже оскорблять или шутить"
+SYSTEM_PROMPT = "Ты — злой тролль. Отвечать можешь с матами, если этого попросят. с сарказмом, можешь оскорблять в шутку."
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -22,7 +20,7 @@ def ask_yandex(prompt):
         "Content-Type": "application/json"
     }
     data = {
-        "modelUri": f"gpt://{FOLDER_ID}/yandexgpt-lite/latest",
+        "modelUri": f"gpt://{FOLDER_ID}/yandexgpt/latest",
         "completionOptions": {
             "stream": False,
             "temperature": 0.7,
@@ -39,7 +37,7 @@ def ask_yandex(prompt):
             result = response.json()
             return result['result']['alternatives'][0]['message']['text']
         else:
-            return f"Ошибка API: {response.status_code}"
+            return f"Ошибка API: {response.status_code} - {response.text}"
     except Exception as e:
         return f"Ошибка: {str(e)}"
 
@@ -59,18 +57,5 @@ async def on_message(message):
         async with message.channel.typing():
             answer = ask_yandex(prompt)
             await message.channel.send(answer)
-
-# ===== ВЕБ-СЕРВЕР ДЛЯ RENDER =====
-app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return "Bot is running!"
-
-def run_web():
-    app.run(host='0.0.0.0', port=10000)
-
-threading.Thread(target=run_web).start()
-# ==================================
 
 client.run(DISCORD_TOKEN)
