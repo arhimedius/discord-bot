@@ -8,7 +8,7 @@ from flask import Flask
 # ===== НАСТРОЙКИ =====
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 FOLDER_ID = "b1gmlsb0iu6theur2edv"
-API_KEY = "AQVNz0WXsDaqkkXl3zteETVbieFI3XgxoiE3peAe"
+API_KEY = os.getenv("YANDEX_API_KEY")
 SYSTEM_PROMPT = "Ты — злой тролль. Отвечаешь язвительно, можешь говорить сколько угодно матов, с сарказмом, можешь оскорблять в шутку."
 # =====================
 
