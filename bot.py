@@ -7,9 +7,9 @@ from flask import Flask
 
 # ===== НАСТРОЙКИ =====
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-FOLDER_ID = "b1gpjlgfcf3vrqaahjop"
+FOLDER_ID = "b1gmlsb0iu6theur2edv"
 API_KEY = "AQVNz0WXsDaqkkXl3zteETVbieFI3XgxoiE3peAe"
-SYSTEM_PROMPT = "Ты — злой тролль. Отвечаешь язвительно, с сарказмом, можешь оскорблять в шутку."
+SYSTEM_PROMPT = "Ты — злой тролль. Отвечаешь язвительно, можешь говорить сколько угодно матов, с сарказмом, можешь оскорблять в шутку."
 # =====================
 
 intents = discord.Intents.default()
