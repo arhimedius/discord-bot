@@ -1,48 +1,32 @@
 import discord
-import requests
-import json
 import os
-import threading
-from flask import Flask
+import google.generativeai as genai
 
 # ===== НАСТРОЙКИ =====
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-FOLDER_ID = "b1gmlsb0iu6theur2edv"
-API_KEY = os.getenv("YANDEX_API_KEY")
-SYSTEM_PROMPT = "Ты — злой тролль. Отвечаешь язвительно, можешь говорить сколько угодно матов, с сарказмом, можешь оскорблять в шутку."
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  # Ключ из Render, а не из кода!
 # =====================
+
+# Проверяем, есть ли ключ
+if not GEMINI_API_KEY:
+    raise ValueError("❌ GEMINI_API_KEY не найден! Добавь его в переменные окружения Render.")
+
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-2.0-flash")
+
+SYSTEM_PROMPT = "Ты — злой тролль. ты можешь отвечать с матом, агрессивно, оскорбляя, но только если в начале напишут QQ. без этого ты обычный бот с юмором, отвечаешь язвительно и с юмором "
 
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
 
-def ask_yandex(prompt):
-    url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
-    headers = {
-        "Authorization": f"Api-Key {API_KEY}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "modelUri": f"gpt://{FOLDER_ID}/yandexgpt/latest",
-        "completionOptions": {
-            "stream": False,
-            "temperature": 0.7,
-            "maxTokens": 500
-        },
-        "messages": [
-            {"role": "system", "text": SYSTEM_PROMPT},
-            {"role": "user", "text": prompt}
-        ]
-    }
+def ask_gemini(prompt):
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=30)
-        if response.status_code == 200:
-            result = response.json()
-            return result['result']['alternatives'][0]['message']['text']
-        else:
-            return f"Ошибка API: {response.status_code} - {response.text}"
+        full_prompt = f"{SYSTEM_PROMPT}\n\nПользователь: {prompt}\nБот:"
+        response = model.generate_content(full_prompt)
+        return response.text
     except Exception as e:
-        return f"Ошибка: {str(e)}"
+        return f"Ошибка Gemini: {str(e)}"
 
 @client.event
 async def on_ready():
@@ -58,26 +42,7 @@ async def on_message(message):
             await message.channel.send("Напиши что-нибудь после моего упоминания")
             return
         async with message.channel.typing():
-            answer = ask_yandex(prompt)
+            answer = ask_gemini(prompt)
             await message.channel.send(answer)
 
-# ===== ВЕБ-СЕРВЕР ДЛЯ RENDER (исправлен) =====
-app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return "Bot is running!"
-
-def run_web():
-    # Получаем порт из переменной окружения Render или используем 10000 по умолчанию
-    port = int(os.environ.get("PORT", 10000))
-    # Запускаем сервер на всех интерфейсах (0.0.0.0)
-    app.run(host='0.0.0.0', port=port)
-
-# Запускаем веб-сервер в отдельном потоке, чтобы не блокировать бота
-web_thread = threading.Thread(target=run_web, daemon=True)
-web_thread.start()
-# =============================================
-
-# Запускаем бота Discord
 client.run(DISCORD_TOKEN)
