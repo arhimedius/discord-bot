@@ -1,20 +1,21 @@
 import discord
 import os
 import google.generativeai as genai
+from flask import Flask
+import threading
 
 # ===== НАСТРОЙКИ =====
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  # Ключ из Render, а не из кода!
-# =====================
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Проверяем, есть ли ключ
 if not GEMINI_API_KEY:
-    raise ValueError("❌ GEMINI_API_KEY не найден! Добавь его в переменные окружения Render.")
+    raise ValueError("❌ GEMINI_API_KEY не найден!")
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash")
+# =====================
 
-SYSTEM_PROMPT = "Ты — злой тролль. ты можешь отвечать с матом, агрессивно, оскорбляя, но только если в начале напишут QQ. без этого ты обычный бот с юмором, отвечаешь язвительно и с юмором "
+SYSTEM_PROMPT = "Ты — злой, немного агрессивный бот. ты можешь оскорблять или материться на участников, но только если они сами этого захотят. "
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -39,10 +40,24 @@ async def on_message(message):
     if client.user in message.mentions:
         prompt = message.content.replace(f"<@{client.user.id}>", "").strip()
         if not prompt:
-            await message.channel.send("Напиши что-нибудь после моего упоминания")
+            await message.channel.send("чава")
             return
         async with message.channel.typing():
             answer = ask_gemini(prompt)
             await message.channel.send(answer)
+
+# ===== ВЕБ-СЕРВЕР ДЛЯ RENDER =====
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return "Bot is running!"
+
+def run_web():
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
+
+threading.Thread(target=run_web, daemon=True).start()
+# ==================================
 
 client.run(DISCORD_TOKEN)
