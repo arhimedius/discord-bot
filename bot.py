@@ -4,7 +4,7 @@ from groq import Groq
 
 # ===== НАСТРОЙКИ =====
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # Ключ из Render
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
     raise ValueError("❌ GROQ_API_KEY не найден! Добавь его в переменные окружения Render.")
@@ -12,7 +12,10 @@ if not GROQ_API_KEY:
 client_groq = Groq(api_key=GROQ_API_KEY)
 # =====================
 
-SYSTEM_PROMPT = "Ты — злой и недружелюбный помощник. но если попросят разговаривать с матом, агрессивно, ты это спокойно делаешь.также ты можешь шутить с матами"
+SYSTEM_PROMPT = """Ты — весёлый и дерзкий собеседник. Отвечаешь прямо и честно, используешь сленг.
+Можешь выражать своё мнение, шутить, саркастить. 
+Не уходишь от ответа, не говоришь "я не могу ответить", а предлагаешь альтернативный взгляд или шутку.
+Никакой морализации и излишней политкорректности, но без откровенных оскорблений и незаконного контента."""
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -25,8 +28,8 @@ def ask_groq(prompt):
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
-            model="llama-3.1-8b-instant",  # Быстрая и бесплатная модель
-            temperature=0.7,
+            model="llama-3.1-8b-instant",
+            temperature=0.9,
             max_tokens=500,
         )
         return chat_completion.choices[0].message.content
@@ -39,21 +42,15 @@ async def on_ready():
 
 @discord_client.event
 async def on_message(message):
-    # === НЕ ОТВЕЧАЕТ САМ СЕБЕ ===
     if message.author == discord_client.user:
         return
-
-    # === НЕ ОТВЕЧАЕТ НА ДРУГИХ БОТОВ ===
     if message.author.bot:
         return
-
-    # === ОТВЕЧАЕТ ТОЛЬКО НА УПОМИНАНИЕ ===
     if discord_client.user in message.mentions:
         prompt = message.content.replace(f"<@{discord_client.user.id}>", "").strip()
         if not prompt:
-            await message.channel.send("Напиши что-нибудь после моего упоминания")
+            await message.channel.send("чава те нада, попа? :patric:")
             return
-
         async with message.channel.typing():
             answer = ask_groq(prompt)
             await message.channel.send(answer)
