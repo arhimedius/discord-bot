@@ -12,7 +12,7 @@ if not GROQ_API_KEY:
 client_groq = Groq(api_key=GROQ_API_KEY)
 # =====================
 
-SYSTEM_PROMPT = "Ты — весёлый и дружелюбный помощник. Отвечаешь кратко, по делу, с юмором."
+SYSTEM_PROMPT = "Ты — весёлый и дружелюбный помощник. но если попросят разговаривать с матом, агрессивно, ты это спокойно делаешь.также ты можешь шутить с матами"
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -39,13 +39,21 @@ async def on_ready():
 
 @discord_client.event
 async def on_message(message):
+    # === НЕ ОТВЕЧАЕТ САМ СЕБЕ ===
     if message.author == discord_client.user:
         return
+
+    # === НЕ ОТВЕЧАЕТ НА ДРУГИХ БОТОВ ===
+    if message.author.bot:
+        return
+
+    # === ОТВЕЧАЕТ ТОЛЬКО НА УПОМИНАНИЕ ===
     if discord_client.user in message.mentions:
         prompt = message.content.replace(f"<@{discord_client.user.id}>", "").strip()
         if not prompt:
             await message.channel.send("Напиши что-нибудь после моего упоминания")
             return
+
         async with message.channel.typing():
             answer = ask_groq(prompt)
             await message.channel.send(answer)
